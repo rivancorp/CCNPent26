@@ -1,0 +1,775 @@
+
+CCNPenterprise26-Day5
+
+startupconfig:
+
+R1:
+config t
+hostname R1
+no logging console
+ip route 0.0.0.0 0.0.0.0 208.8.8.2 
+line vty 0 14
+ transport input all
+ exec-timeout 0 0
+int gi 1
+ ip add 208.8.8.11 255.255.255.0
+ !where x= .11, .12. 13
+ no shut
+int gi 2
+ no shut
+ ip add 192.168.102.11 255.255.255.0
+int gi 3
+ no shut
+ ip add 192.168.103.11 255.255.255.0
+ end
+wr
+
+R2:
+config t
+hostname R2
+no logging console
+ip route 0.0.0.0 0.0.0.0 208.8.8.2 
+line vty 0 14
+ transport input all
+ exec-timeout 0 0
+int gi 1
+ ip add 208.8.8.12 255.255.255.0
+ !where x= .11, .12. 13
+ no shut
+int gi 2
+ no shut
+ ip add 192.168.102.12 255.255.255.0
+int gi 3
+ no shut
+ ip add 192.168.103.12 255.255.255.0
+ end
+wr
+
+R3:
+config t
+hostname R3
+no logging console
+ip route 0.0.0.0 0.0.0.0 208.8.8.2 
+line vty 0 14
+ exec-timeout 0 0
+ transport input all
+int gi 1
+ ip add 208.8.8.13 255.255.255.0
+ !where x= .11, .12. 13
+ no shut
+int gi 2
+ no shut
+ ip add 192.168.102.13 255.255.255.0
+int gi 3
+ no shut
+ ip add 192.168.103.13 255.255.255.0
+ end
+wr
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+ @@@@@@@@@@      hsrp:  @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+Rx: where x= .11,.12, .13
+config t
+R1#show run
+GI1:108.5                        GI1:108.6
+APPS1                             APPS2
+GI2:102.5                        GI2:102.6
+             HSRPIP:  102.7
+GI3:103.5                        GI3:103.6
+             HSRPIP:  103.7
+          use standby 3 and track 3
+
+R1:PrimaryInt:
+config t
+Int gi 2
+standby version 2
+standby 2 ip 192.168.102.123
+standby 2 preempt
+standby 2 Priority 150
+standby 2 track 1 decrement 60
+END
+
+R2: Backup:
+config t
+Int gi 2
+standby version 2
+standby 2 ip 192.168.102.123
+standby 2 preempt
+standby 2 Priority 100
+standby 2 track 2 decrement 20
+END
+
+R3: BackupOfBackup:
+config t
+Int gi 2
+standby version 2
+standby 2 ip 192.168.102.123
+standby 2 preempt
+standby 2 Priority 90
+END
+
+CONFIGURE REAL IP SLA: Service level agreement:
+
+3 Parts: IP SLA, tracking and HSRP.
+IP SLA (Internet Protocol Service Level Agreement)
+measures network performance and connectivity
+ICMP response time.
+Packet loss.
+Network latency.
+Jitter.
+TCP connectivity.
+
+@R1: PrimaryInt
+config t
+ip sla 1 
+  icmp-echo 8.8.8.8
+  freq 30
+  exit
+ip  sla  schedule 1 life forever start-time now
+track  1  ip sla 1
+  delay down 6 up 3
+  !Wait 6 seconds before declaring tracking DOWN
+  !Wait 3 seconds before declaring tracking UP
+  exit
+Int gi 2
+standby 2 track 1 decrement 60
+end
+
+
+@R2: Secondary/backupInternet
+config t
+ip sla 2 
+  icmp-echo 8.8.8.8
+  freq 15
+  exit
+ip  sla  schedule 2 life forever start-time now
+track  2  ip sla 2
+  delay down 6 up 3
+  exit
+Int gi 2
+standby 2 track 2 decrement 20
+end
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@     glbp:       @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+R1:PrimaryInt: ActiveVirtualGateway/AVG
+-Managing the virtual gateway
+-Assigning virtual MAC addresses to clients
+-Distributing traffic among the Active Virtual Forwarders (AVFs
+-Responding to ARP requests for the virtual gateway IP
+
+
+config t
+Int gi 3
+glbp 3 ip 192.168.103.123
+glbp 3 priority 150
+glbp 3 preempt
+glbp 3 load-balancing host-dependent
+!Distributes gateway forwarding assignments based on the MAC address
+!Round-robin vs Weighted
+!glbp 3 load-balancing weighted
+!glbp 3 weighting 90
+glbp 3 weighting track 1 decrement 60
+end
+
+
+R2: Secondary/backupInternet: ActiveVirtualForwarder
+config t
+Int gi 3
+glbp 3 ip 192.168.103.123
+glbp 3 priority 100
+glbp 3 preempt
+glbp 3 load-balancing host-dependent
+!glbp 3 weighting 95
+glbp 3 weighting track 2 decrement 20
+!glbp 3 authentication md5 key-string rivankey
+end
+
+
+R3: last resort:   ActiveVirtualForwarder
+config t
+no event manager applet TangaKa
+event manager applet TangaKa
+  event cli pattern "no ip route 0.0.0.0 0.0.0.0 208.8.8.2" sync no skip yes
+  action 1.0 syslog msg "Bobo! wala na tayong Backup!..."
+  exit
+Int gi 3
+glbp 3 ip 192.168.103.123
+glbp 3 priority 90
+glbp 3 preempt
+glbp 3 load-balancing host-dependent
+glbp 3 weighting 97
+end
+
+PC1:
+debug arp
+ping 192.168.103.123
+
+
+##### variation ###########
+##### variation ###########
+R1:PrimaryInt:
+config t
+Int gi 3
+glbp 3 ip 192.168.103.123
+glbp 3 priority 150
+glbp 3 preempt
+glbp 3 load-balancing weighted
+glbp 3 weighting 100
+glbp 3 weighting track 1 decrement 60
+end
+
+
+R2: Secondary/backupInternet
+config t
+Int gi 3
+glbp 3 ip 192.168.103.123
+glbp 3 priority 100
+glbp 3 preempt
+glbp 3 load-balancing weighted
+glbp 3 weighting 75
+glbp 3 weighting track 2 decrement 20
+end
+
+
+R3: last resort:  
+config t
+no event manager applet TangaKa
+event manager applet TangaKa
+  event cli pattern "no ip route 0.0.0.0 0.0.0.0 208.8.8.2" sync no skip yes
+  action 1.0 syslog msg "Bobo! wala na tayong Backup!..."
+  exit
+Int gi 3
+glbp 3 ip 192.168.103.123
+glbp 3 priority 90
+glbp 3 preempt
+glbp 3 load-balancing weighted
+glbp 3 weighting 60
+end
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@     COPP       @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+Control Plane Policing:
+
+Task0: prevent icmp overload:
+config t
+ip access-list extended PING
+  permit icmp any any
+!
+class-map CMPING
+  match access-group name PING
+!
+no policy-map PMPING
+policy-map PMPING
+  class CMPING
+  !limit to 8bps and drop exceeding
+  police 8000 conform-action transmit exceed-action drop
+  exit
+!
+control-plane
+ service-policy input PMPING
+ exit
+do sh policy-map control-plane
+
+TEST:
+ping 192.168.103.13 -t -l 1400
+Request timed out.
+Request timed out.
+Reply from 192.168.103.13: bytes=1400 time=16ms TTL=255
+Request timed out.
+
+
+ANOTHERactual:
+
+config t
+no access-list 100
+access-list 100 permit icmp any any
+!
+no class-map ICMP
+class-map ICMP
+ match access-group 100
+ exit
+!
+no policy-map ICMP-POLICY
+policy-map ICMP-POLICY
+ class ICMP
+  police 8000 conform-action transmit exceed-action drop
+  exit
+ exit
+ exit
+!
+control-plane
+ service-policy input ICMP-POLICY
+ DO  sh policy-map control-plane
+ 
+TEST:
+ping 192.168.103.13 -t -l 1400
+Request timed out.
+Request timed out.
+Reply from 192.168.103.13: bytes=1400 time=16ms TTL=255
+Request timed out.
+
+TASK1: 
+pre-config:
+config t
+ip dns server
+ip finger
+ip http server
+ip http secure-server
+
+
+config t
+!ac
+ip access-list extended TELNET
+ permit tcp any any eq 23
+ exit
+ip access-list extended SSH
+ permit tcp any any eq 22
+ exit
+ip access-list extended ICMP
+ permit icmp any any
+ exit
+!cm
+class-map match-all CMTEL
+ match access-group name TELNET
+ exit
+class-map match-all CMSSH
+ match access-group name SSH
+ exit
+class-map match-all CMICMP
+ match access-group name ICMP
+ exit
+!PM
+policy-map PMCOPP
+ !pass ALL TELNET TRAFFIC
+ class CMTEL
+  police 8000 conform-action drop exceed-action drop
+ !limit ALL SSH TRAFFIC
+ class CMSSH
+  police 500000 conform-action transmit exceed-action transmit
+ !set ping at 10pps, confrom to transmit, exceed to drop
+ class CMICMP
+  police rate 10 pps conform-action transmit exceed-action drop
+ class class-default
+  police 12000 conform-action transmit exceed-action transmit
+ exit
+!SP
+control-plane
+ service-policy input PMCOPP
+END
+show class-map
+show policy-map
+show policy-map control-plane
+
+TASK2:
+User
+write a cisco configuration for COPP that will totally block http 
+traffic but allow telnet and ssh traffic using one service-policy only
+
+config t
+! Define an access control list (ACL) to match HTTP traffic
+access-list 101 deny tcp any any eq 443
+access-list 101 permit ip any any
+
+! Create a class map to match the ACL
+class-map match-all HTTPS-Traffic
+  match access-group 101
+
+! Create a policy map for CoPP
+no policy-map Control-Plane-Policing
+policy-map Control-Plane-Policing
+  class HTTPS-Traffic
+    police 80000 1500 1500 conform-action transmit exceed-action drop violate-action drop
+    exit
+! Apply the CoPP policy to the control plane
+control-plane
+ service-policy input Control-Plane-Policing
+ exit
+ 
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@     QOS      @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+tcp.port == 23 ||
+tcp.port == 80 ||
+tcp.port == 443 ||
+dns
+
+
+Telnet – TCP port 23
+HTTP – TCP port 80
+HTTPS – TCP port 443
+DNS – UDP port 53 (and sometimes TCP port 53)
+
+Identify application traffic using TCP and UDP port numbers.
+Understand ACL-based QoS classification.
+Create class-maps and policy-maps.
+Assign different QoS priorities to applications.
+Apply QoS policies to a Cisco router interface.
+Verify QoS counters using Cisco CLI.
+Observe traffic using Wireshark.
+
+R3:
+config t
+!ac
+ip access-list extended TELNET
+ permit tcp any any eq 23
+ exit
+ip access-list extended SSH
+ permit tcp any any eq 22
+ exit
+ip access-list extended DNS
+ permit tcp any any eq 53
+ permit udp any any eq 53
+ exit
+ip access-list extended HTTP
+ permit tcp any any eq 80
+ exit
+!cm
+class-map match-all CMTEL
+ match access-group name TELNET
+ exit
+class-map match-all CMSSH
+ match access-group name SSH
+ exit
+class-map match-all CMDNS
+ match access-group name DNS
+ exit
+class-map match-all CMHTTP
+ match access-group name HTTP
+ exit
+! 
+policy-map QOS-LAB
+ class CMTEL
+  set dscp cs2
+ exit
+ class CMSSH
+  set dscp af41
+ exit
+ class CMDNS
+  set dscp af31
+ exit
+ class CMHTTP
+  set dscp cs5
+ exit
+interface gigabitEthernet1
+ service-policy input QOS-LAB
+ service-policy output QOS-LAB
+ exit
+end
+
+TEST: 
+R3#TELNET 208.8.8.12  and look at wireshark for telnet cs2
+
+R3#TELNET 208.8.8.12 53  and look at wireshark for telnet af 31
+
+R3#ssh -l admin 208.8.8.12
+Password: 
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@     netflow:      @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+NetFlow is a Cisco technology that collects information 
+about network traffic flows
+
+-Source IP address.
+-Destination IP address.
+-IP protocol.
+-Source port.
+-Destination port.
+
+
+configure terminal
+interface gigabitEthernet1
+ description NETFLOW-MONITORED-LINK
+ 
+STEP1: Create a NetFlow Record
+
+configure terminal
+flow record NF-RECORD
+ description COLLECT-IP-TRAFFIC
+!
+ match ipv4 source address
+ match ipv4 destination address
+ match ipv4 protocol
+ match transport source-port
+ match transport destination-port
+!
+ collect counter bytes long
+ collect counter packets long
+!
+ collect timestamp absolute first
+ collect timestamp absolute last
+!
+exit
+
+STEP2: Create the NetFlow Exporter
+
+config t
+flow exporter NF-EXPORTER
+ description SEND-FLOWS-TO-COLLECTOR
+ destination 208.8.8.1
+ source GigabitEthernet1
+ transport udp 2055
+ export-protocol netflow-v9
+exit
+
+STEP3: Create the Flow Monitor
+
+config t
+flow monitor NF-MONITOR
+ description MONITOR-OUTBOUND-TRAFFIC
+ record NF-RECORD
+ exporter NF-EXPORTER
+ !
+ cache timeout active 60
+ cache timeout inactive 15
+!
+exit
+
+STEP3: Apply NetFlow to GigabitEthernet1
+
+configure terminal
+interface gigabitEthernet1
+ ip flow monitor NF-MONITOR output
+exit
+end
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@    Radius:   @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+!@CSR1000v
+conf t
+ username admin privilege 15 secret pass
+ aaa new-model
+ radius server WINRAD
+  address ipv4 10.m.1.8 auth-port 1812 acct-port 1813
+  key keykeymo
+  exit
+ aaa group server radius RADGROUP
+  server name WINRAD
+  exit
+ aaa authentication login default group RADGROUP local
+ aaa authorization exec default group RADGROUP local
+ line vty 0 14
+  login authentication default
+ end
+
+config t
+ip http authentication aaa
+end
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@    nexus:   @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+task11: why CCNP/Datacenter LOVE nexus: = turn Back Time!
+show checkpoint summary 
+
+task12: enabling nexus feaures:
+show feature
+config t
+feature ospf
+feature nv overlay
+feature bgp
+feature interface-vlan
+feature vn-segment-vlan-based
+system jumbomtu 9216
+end
+copy run start
+
+TASK13: Nexus COre OSPF config:
+@NexusONE
+config t
+router ospf 10
+int e1/1
+ no switchport
+ ip address 100.1.1.1/30
+ ip router ospf 10 area 0
+ no shutdown
+ exit
+Int loopback 0
+ ip address 10.10.10.10/32
+ ip router ospf 10 area 0
+exit
+vlan 50
+ vn-segment 5000
+exit
+interface eth 1/5-6
+ switchport
+ switchport access vlan 50
+ exit
+Interface Nve 1
+ no shutdown
+ source-interface loopback 0
+ member vni 5000
+  ingress-replication protocol static
+    peer-ip 20.20.20.20
+  exit
+@@@n9k2
+config t
+feature ospf
+feature nv overlay
+feature vn-segment-vlan-based
+system jumbomtu 9216
+!
+router ospf 10
+!
+interface eth 1/1
+ no switchport
+ ip address 100.1.1.2/30
+ ip router ospf 10 area 0
+ no shut
+interface loopback0
+ ip address 20.20.20.20/32
+ ip router ospf 10 area 0
+!
+vlan 50
+ vn-segment 5000
+
+interface ethernet 1/5-6
+  switchport
+  switchport access vlan 50
+  no shutdown
+
+interface nve 1
+  no shutdown
+  source-interface loopback 0
+  member vni 5000
+   ingress-replication protocol static
+     peer-ip 10.10.10.10
+	 exit
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@    lisp:   @@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+ENCOR TASK16: Locator/Identifier Separation Protocol:
+LISP PROTOCOL: or ANTI-BGP, Anti-VPN.
+
+@sa tatlong CSR:
+config t
+no logging console
+no ip domain lookup
+ip ssh version 1
+int gi 1
+ no shut
+ ip address dhcp
+ do sh ip int brief
+
+@allRouters:
+config t
+cdp run
+int gi 2
+cdp enable
+no shut
+int gi 3
+cdp enable
+no shut
+end
+@R2:
+conf t
+router ospf 1
+network 2.2.2.2 0.0.0.0 area 0
+network 130.0.0.2 0.0.0.0 area 0
+network 140.0.0.2 0.0.0.0 area 0
+int lo 0
+ip add 2.2.2.2 255.255.255.255
+int gi 2
+ip add 130.0.0.2 255.255.255.0
+no shut
+int gi 3
+ip add 140.0.0.2 255.255.255.0
+no shut
+end
+
+R1:
+conf t
+router ospf 1
+network 130.0.0.1 0.0.0.0 area 0
+int gi 2
+ip add 130.0.0.1 255.255.255.0
+no shut
+int lo 0
+ ip add 1.1.1.1 255.255.255.255
+end
+R3:
+conf t
+router ospf 1
+network 140.0.0.3 0.0.0.0 area 0
+int gi 3
+ip add 140.0.0.3 255.255.255.0
+no shut
+int lo 0
+ ip add 3.3.3.3 255.255.255.255
+end
+
+LISP CONFGIURATION: MAP SERVER/MAP RESOLVER.
+R2: mapserver/mapresolver: can Ping everyone:
+config t
+router lisp
+ipv4 map-server
+ipv4 map-resolver
+!
+lisp site siteR3
+eid-prefix 3.3.3.3/32
+authentication-key rivansite3
+!
+lisp site siteR1
+eid-prefix 1.1.1.1/32
+authentication-key rivansite1
+!
+ip lisp map-server
+ip lisp map-resolver
+!
+show list site
+show ip lisp map-cache
+show ip list database
+end
+@ETR/ITR:
+R1:
+config t
+router Lisp
+database-mapping 1.1.1.1/32 130.0.0.1 priority 1 weight 100
+ipv4 itr
+ipv4 itr map-resolver 2.2.2.2
+ipv4 etr
+ipv4 etr map-server 2.2.2.2 key rivansite1
+end
+R3:
+config t
+router Lisp
+database-mapping 3.3.3.3/32 140.0.0.3 priority 1 weight 100
+ipv4 itr
+ipv4 itr map-resolver 2.2.2.2
+ipv4 etr
+ipv4 etr map-server 2.2.2.2 key rivansite3
+end
