@@ -1,0 +1,1755 @@
+
+FIND AND REPLACE THE FOLLOWING - From # to #
+
+! Monitor Num:      #$34T#
+! Cam6 Mac Add:     #camera6macadd#
+! Cam8 Mac Add:     #camera8macadd#
+! Ephone 1 Mac: 	#ephone1macadd#
+! Ephone 2 Mac: 	#ephone2macadd#
+! YourPhone Mac:	#mym0bilemac#
+! OtherPhone Mac:	#othm0bilemac#
+! SipPhone1:        #sip1macadd#
+! SipPhone2:        #sip2macadd#
+
+Know the following commands:
+ - SR:		show run
+ - SS:		show start
+ - CRS:		copy run start
+ - SPI:		show power inline
+ - SIIB:	show ip interface brief
+ - SVB:		show vlan brief
+ - SIDB:	show ip dhcp binding
+ - SMAC:	show mac address-table
+ - SVPS:	show voice port summary
+ - SDPVS:	show dial-peer voice summary
+ - CS:		csim start [potsnum]
+ 
+ *For Day 5
+ 
+ - SES:		show etherchannel summary
+ - SMT:		switchport mode trunk
+ - STED:	switchport trunk encapsulation dot1q
+ - STAV:	switchport trunk allowed vlan
+ - STNV:	switchport trunk native vlan
+
+ 
+************** Day 1 Configuration **************
+
+!@3650 Switch
+conf t
+ sdm prefer dual-ipv4-and-ipv6 default
+ end
+wr
+reload
+
+
+!@PC
+IPv6 address:   fd00::10:#$34T#:1:10/120
+IPv6 DNS:       ::1
+
+
+!@CoreTAAS
+conf t
+ hostname CoreTAAS-#$34T#
+ enable secret pass
+ service password-encryption
+ no logging console
+ no ip domain-lookup
+ line cons 0
+  password pass
+  login
+  exec-timeout 0 0
+ line vty 0 14
+  password pass
+  login
+  exec-timeout 0 0
+  exit
+ !
+ ipv6 unicast-routing
+ !
+ int vlan 1
+  no shut
+  ip add 10.#$34T#.1.2 255.255.255.0
+  ipv6 add fd00::10:#$34T#:1:2/120
+  ipv6 nd ra suppress
+  desc DEFAULT-VLAN
+ int vlan 10
+  no shut
+  ip add 10.#$34T#.10.2 255.255.255.0
+  ipv6 add fd00::10:#$34T#:10:2/120
+  ipv6 nd ra suppress
+  desc WIFI-VLAN
+ int vlan 50
+  no shut
+  ip add 10.#$34T#.50.2 255.255.255.0
+  ipv6 add fd00::10:#$34T#:50:2/120
+  ipv6 nd ra suppress
+  desc CCTV-VLAN
+ int vlan 100
+  no shut
+  ip add 10.#$34T#.100.2 255.255.255.0
+  ipv6 add fd00::10:#$34T#:100:2/120
+  desc VOICE-VLAN
+ end
+
+
+
+
+
+!@CoreBABA
+conf t
+ hostname CoreBABA-#$34T#
+ enable secret pass
+ service password-encryption
+ no logging console
+ no ip domain-lookup
+ line cons 0
+  password pass
+  login
+  exec-timeout 0 0
+ line vty 0 14
+  password pass
+  login
+  exec-timeout 0 0
+  exit
+ !
+ ipv6 unicast-routing
+ !
+ int gi 0/1
+  no shut
+  no switchport
+  ip add 10.#$34T#.#$34T#.4 255.255.255.0
+  ipv6 add fd00::10:#$34T#:#$34T#:4/120
+ int vlan 1
+  no shut
+  ip add 10.#$34T#.1.4 255.255.255.0
+  ipv6 add fd00::10:#$34T#:1:4/120
+  desc DEFAULT-VLAN
+ int vlan 10
+  no shut
+  ip add 10.#$34T#.10.4 255.255.255.0
+  ipv6 add fd00::10:#$34T#:10:4/120
+  ipv6 nd ra suppress
+  desc WIFI-VLAN
+ int vlan 50
+  no shut
+  ip add 10.#$34T#.50.4 255.255.255.0
+  ipv6 add fd00::10:#$34T#:50:4/120
+  ipv6 nd ra suppressx
+  desc CCTV-VLAN
+ int vlan 100
+  no shut
+  ip add 10.#$34T#.100.4 255.255.255.0
+  ipv6 add fd00::10:#$34T#:100:4/120
+  desc VOICE-VLAN
+ end
+
+!@dhcpv4
+conf t
+ ip dhcp excluded-add 10.#$34T#.1.1 10.#$34T#.1.100
+ ip dhcp excluded-add 10.#$34T#.10.1 10.#$34T#.10.100
+ ip dhcp excluded-add 10.#$34T#.50.1 10.#$34T#.50.100
+ ip dhcp excluded-add 10.#$34T#.100.1 10.#$34T#.100.100
+ !
+ ip dhcp pool POOLDATA
+  network 10.#$34T#.1.0 255.255.255.0
+  default-router 10.#$34T#.1.4
+  domain-name MGMTDATA.COM
+  dns-server 10.#$34T#.1.10
+ ip dhcp pool POOLWIFI
+  network 10.#$34T#.10.0 255.255.255.0
+  default-router 10.#$34T#.10.4
+  domain-name WIFIDATA.COM
+  dns-server 10.#$34T#.1.10
+  option 43 ip 10.#$34T#.10.#$34T#
+ ip dhcp pool POOLCCTV
+  network 10.#$34T#.50.0 255.255.255.0
+  default-router 10.#$34T#.50.4
+  domain-name CCTVDATA.COM
+  dns-server 10.#$34T#.1.10
+ ip dhcp pool POOLVOICE
+  network 10.#$34T#.100.0 255.255.255.0
+  default-router 10.#$34T#.100.4
+  domain-name VOICEDATA.COM
+  dns-server 10.#$34T#.1.10
+  option 150 ip 10.#$34T#.100.8
+  end
+
+!@dhcpv6
+conf t
+ ipv6 dhcp pool POOLDATAv6
+  address prefix fd00::10:#$34T#:1:0/120
+  domain-name MGMTDATA.COM
+  dns-server fd00::10:#$34T#:1:10
+ ipv6 dhcp pool POOLWIFIv6
+  address prefix fd00::10:#$34T#:10:0/120
+  domain-name WIFIDATA.COM
+  dns-server fd00::10:#$34T#:1:10
+ ipv6 dhcp pool POOLCCTVv6
+  address prefix fd00::10:#$34T#:50:0/120
+  domain-name CCTVDATA.COM
+  dns-server fd00::10:#$34T#:1:10
+ ipv6 dhcp pool POOLVOICEv6
+  address prefix fd00::10:#$34T#:100:0/120
+  domain-name VOICEDATA.COM
+  dns-server fd00::10:#$34T#:1:10
+  exit
+ !
+ int vlan 1
+  ipv6 dhcp server POOLDATAv6
+  ipv6 nd managed-config-flag
+  ipv6 nd other-config-flag
+ int vlan 10
+  ipv6 dhcp server POOLWIFIv6
+  ipv6 nd managed-config-flag
+  ipv6 nd other-config-flag
+ int vlan 50
+  ipv6 dhcp server POOLCCTVv6
+  ipv6 nd managed-config-flag
+  ipv6 nd other-config-flag 
+ int vlan 100
+  ipv6 dhcp server POOLVOICEv6
+  ipv6 nd managed-config-flag
+  ipv6 nd other-config-flag
+  end
+  
+!@switchport
+conf t
+ vlan 10
+  name WIFIVLAN
+ vlan 50
+  name CCTVVLAN
+ vlan 100
+  name VOICEVLAN
+ int fa 0/2
+  switchport mode access
+  switchport access vlan 10
+ int fa 0/4
+  switchport mode access
+  switchport access vlan 10
+ int fa 0/6
+  switchport mode access
+  switchport access vlan 50
+ int fa 0/8
+  switchport mode access
+  switchport access vlan 50
+ int fa 0/3
+  switchport mode access
+  switchport access vlan 100
+ int fa 0/5
+  switchport mode access
+  switchport voice vlan 100
+  switchport access vlan 1
+  mls qos trust device cisco-phone
+ int fa 0/7
+  switchport mode access
+  switchport voice vlan 100
+  switchport access vlan 1
+  mls qos trust device cisco-phone
+ end
+
+!@camera
+conf t
+ ip routing
+ ip dhcp pool CAMERA6
+  host 10.#$34T#.50.6 255.255.255.0
+  client-identifier #camera6macadd#
+ ip dhcp pool CAMERA8
+  host 10.#$34T#.50.8 255.255.255.0
+  client-identifier #camera8macadd#
+ end
+
+!@default route Corebaba
+conf t 
+ ip routing
+ ip route 0.0.0.0 0.0.0.0 10.#$34T#.#$34T#.1 254
+ ipv6 route ::/0 fd00::10:#$34T#:#$34T#:1 254
+end
+
+!@ospf routing CoreBABA
+conf t
+router ospf 1
+router-id 10.#$34T#.#$34T#.4
+network 10.#$34T#.0.0 0.0.255.255 area 0
+int gi 0/1
+ip ospf network point-to-point
+end
+
+!@ospfv3 routing CoreBABA
+conf t
+ ipv6 router ospf 6
+  router-id 10.#$34T#.#$34T#.4
+  passive-interface default
+  no passive-interface vlan 1
+  no passive-interface vlan 100
+  no passive-interface g0/1
+  exit
+ int g0/1
+  ipv6 ospf 6 area 0
+  ipv6 ospf network point-to-point
+ int vlan 1
+  ipv6 ospf 6 area 0
+ int vlan 10
+  ipv6 ospf 6 area 0
+ int vlan 50
+  ipv6 ospf 6 area 0
+ int vlan 100
+  ipv6 ospf 6 area 0
+  end
+
+
+
+
+
+!@CUCM
+conf t
+ hostname CUCM-#$34T#
+ enable secret pass
+ service password-encryption
+ no logging console
+ no ip domain-lookup
+ line cons 0
+  password pass
+  login
+  exec-timeout 0 0
+ line vty 0 14
+  password pass
+  login
+  exec-timeout 0 0
+  exit
+ !
+ ipv6 unicast-routing
+ !
+ int fa 0/0
+  no shut
+  ip add 10.#$34T#.100.8 255.255.255.0
+  ipv6 add fd00::10:#$34T#:100:8/120
+  end
+
+!@analog & ephone SCCP
+conf t
+ dial-peer voice 1 pots
+  destination-pattern #$34T#100
+  port 0/0/0
+ dial-peer voice 2 pots
+  destination-pattern #$34T#101
+  port 0/0/1
+ dial-peer voice 3 pots
+  destination-pattern #$34T#102
+  port 0/0/2
+ dial-peer voice 4 pots
+  destination-pattern #$34T#103
+  port 0/0/3
+ end
+
+conf t
+ no telephony-service
+ telephony-service
+  no auto assign
+  no auto-reg-ephone
+  max-ephones 5
+  max-dn 20
+  protocol mode dual-stack 
+  ip source-address 10.#$34T#.100.8 port 2000
+  ! ip source-address fd00::10:#$34T#:100:8
+  create cnf-files
+ ephone-dn 1
+  number #$34T#111
+ ephone-dn 2
+  number #$34T#122
+ ephone-dn 3
+  number #$34T#133
+ ephone-dn 4
+  number #$34T#144
+ ephone-dn 5
+  number #$34T#155
+ ephone-dn 6
+  number #$34T#166
+ ephone-dn 7
+  number #$34T#177
+ ephone-dn 8
+  number #$34T#188
+ ephone 1
+  mac-address #ephone1macadd#
+  type 8945
+  button 1:1 2:2 3:3 4:4
+  restart
+ ephone 2
+  mac-address #ephone2macadd#
+  type 8945
+  button 1:5 2:6 3:7 4:8
+  restart
+ end
+
+!@video call
+conf t
+ ephone 1
+  video
+  voice service voip
+  h323
+  call start slow
+ ephone 2
+  video
+  voice service voip
+  h323
+  call start slow
+end
+
+!@incoming and outgoing
+conf t
+ voice service voip
+ ip address trusted list
+ ipv4 0.0.0.0 0.0.0.0
+ ! ipv6 fd00::/0
+ end
+
+conf t
+ dial-peer voice 11 Voip
+  destination-pattern 111..
+  session target ipv4:10.11.100.8
+  codec g711ULAW
+ dial-peer voice 12 Voip
+  destination-pattern 121..
+  session target ipv4:10.12.100.8
+  codec g711ULAW
+ dial-peer voice 21 Voip
+  destination-pattern 211..
+  session target ipv4:10.21.100.8
+  codec g711ULAW
+ dial-peer voice 22 Voip
+  destination-pattern 221..
+  session target ipv4:10.22.100.8
+  codec g711ULAW
+ dial-peer voice 31 Voip
+  destination-pattern 311..
+  session target ipv4:10.31.100.8
+  codec g711ULAW
+ dial-peer voice 32 Voip
+  destination-pattern 321..
+  session target ipv4:10.32.100.8
+  codec g711ULAW
+ dial-peer voice 41 Voip
+  destination-pattern 411..
+  session target ipv4:10.41.100.8
+  codec g711ULAW
+ dial-peer voice 42 Voip
+  destination-pattern 421..
+  session target ipv4:10.42.100.8
+  codec g711ULAW
+ dial-peer voice 51 Voip
+  destination-pattern 511..
+  session target ipv4:10.51.100.8
+  codec g711ULAW
+ dial-peer voice 52 Voip
+  destination-pattern 521..
+  session target ipv4:10.52.100.8
+  codec g711ULAW
+ dial-peer voice 61 Voip
+  destination-pattern 611..
+  session target ipv4:10.61.100.8
+  codec g711ULAW
+ dial-peer voice 62 Voip
+  destination-pattern 621..
+  session target ipv4:10.62.100.8
+  codec g711ULAW
+ dial-peer voice 71 Voip
+  destination-pattern 711..
+  session target ipv4:10.71.100.8
+  codec g711ULAW
+ dial-peer voice 72 Voip
+  destination-pattern 721..
+  session target ipv4:10.72.100.8
+  codec g711ULAW
+ dial-peer voice 81 Voip
+  destination-pattern 811..
+  session target ipv4:10.81.100.8
+  codec g711ULAW
+ dial-peer voice 82 Voip
+  destination-pattern 821..
+  session target ipv4:10.82.100.8
+  codec g711ULAW
+ dial-peer voice 91 Voip
+  destination-pattern 911..
+  session target ipv4:10.91.100.8
+  codec g711ULAW
+ dial-peer voice 92 Voip
+  destination-pattern 921..
+  session target ipv4:10.92.100.8
+  codec g711ULAW
+  exit
+ no dial-peer voice #$34T# Voip
+ !
+ !
+ !
+ dial-peer voice 116 Voip
+  destination-pattern 111..
+  session target ipv6:[fd00::10:11:100:8]
+  codec g711ULAW
+ dial-peer voice 126 Voip
+  destination-pattern 121..
+  session target ipv6:[fd00::10:12:100:8]
+  codec g711ULAW
+ dial-peer voice 216 Voip
+  destination-pattern 211..
+  session target ipv6:[fd00::10:21:100:8]
+  codec g711ULAW
+ dial-peer voice 226 Voip
+  destination-pattern 221..
+  session target ipv6:[fd00::10:22:100:8]
+  codec g711ULAW
+ dial-peer voice 316 Voip
+  destination-pattern 311..
+  session target ipv6:[fd00::10:31:100:8]
+  codec g711ULAW
+ dial-peer voice 326 Voip
+  destination-pattern 321..
+  session target ipv6:[fd00::10:32:100:8]
+  codec g711ULAW
+ dial-peer voice 416 Voip
+  destination-pattern 411..
+  session target ipv6:[fd00::10:41:100:8]
+  codec g711ULAW
+ dial-peer voice 426 Voip
+  destination-pattern 421..
+  session target ipv6:[fd00::10:42:100:8]
+  codec g711ULAW
+ dial-peer voice 516 Voip
+  destination-pattern 511..
+  session target ipv6:[fd00::10:51:100:8]
+  codec g711ULAW
+ dial-peer voice 526 Voip
+  destination-pattern 521..
+  session target ipv6:[fd00::10:52:100:8]
+  codec g711ULAW
+ dial-peer voice 616 Voip
+  destination-pattern 611..
+  session target ipv6:[fd00::10:61:100:8]
+  codec g711ULAW
+ dial-peer voice 626 Voip
+  destination-pattern 621..
+  session target ipv6:[fd00::10:62:100:8]
+  codec g711ULAW
+ dial-peer voice 716 Voip
+  destination-pattern 711..
+  session target ipv6:[fd00::10:71:100:8]
+  codec g711ULAW
+ dial-peer voice 726 Voip
+  destination-pattern 721..
+  session target ipv6:[fd00::10:72:100:8]
+  codec g711ULAW
+ dial-peer voice 816 Voip
+  destination-pattern 811..
+  session target ipv6:[fd00::10:81:100:8]
+  codec g711ULAW
+ dial-peer voice 826 Voip
+  destination-pattern 821..
+  session target ipv6:[fd00::10:82:100:8]
+  codec g711ULAW
+ dial-peer voice 916 Voip
+  destination-pattern 911..
+  session target ipv6:[fd00::10:91:100:8]
+  codec g711ULAW
+ dial-peer voice 926 Voip
+  destination-pattern 921..
+  session target ipv6:[fd00::10:92:100:8]
+  codec g711ULAW
+  exit
+ no dial-peer voice #$34T#6 Voip
+ end
+
+!@default route CUCM
+conf t
+ ip routing
+ ip route 0.0.0.0 0.0.0.0 10.#$34T#.100.4 254
+ ipv6 route ::/0 fd00::10:#$34T#:100:4  254
+ end
+
+!@ospf routing CUCM
+conf t
+ router ospf 1
+  router-id 10.#$34T#.100.8
+  network 10.#$34T#.100.0 0.0.0.255 area 0
+  end
+
+!@ospfv3 routing CUCM
+conf t
+ ipv6 router ospf 6
+  router-id 10.#$34T#.100.8
+  exit
+ int fa0/0
+  ipv6 ospf 6 area 0
+  end
+
+
+
+
+
+!@EDGE
+conf t
+ hostname EDGE-#$34T#
+ enable secret pass
+ service password-encryption
+ no logging console
+ no ip domain-lookup
+ line cons 0
+  password pass
+  login
+  exec-timeout 0 0
+ line vty 0 14
+  password pass
+  login
+  exec-timeout 0 0
+  exit
+ !
+ ipv6 unicast-routing
+ !
+ int gi 0/0/0
+  no shut
+  ip add 10.#$34T#.#$34T#.1 255.255.255.0
+  ipv6 add fd00::10:#$34T#:#$34T#:1/120
+  desc INSIDE
+ int gi 0/0/1
+  no shut
+  ip add 200.0.0.#$34T# 255.255.255.0
+  ipv6 add fd00::200:0:0:#$34T#/120
+  desc OUTSIDE
+ int loopback 0
+  ip add #$34T#.0.0.1 255.255.255.255
+  ipv6 add fd00::#$34T#:0:0:1/128
+  desc VIRTUALIP
+ end
+
+!@static routing
+conf t
+ ip routing
+ ip route 10.11.0.0 255.255.0.0 200.0.0.11 254
+ ip route 10.12.0.0 255.255.0.0 200.0.0.12 254
+ ip route 10.21.0.0 255.255.0.0 200.0.0.21 254
+ ip route 10.22.0.0 255.255.0.0 200.0.0.22 254
+ ip route 10.31.0.0 255.255.0.0 200.0.0.31 254
+ ip route 10.32.0.0 255.255.0.0 200.0.0.32 254
+ ip route 10.41.0.0 255.255.0.0 200.0.0.41 254
+ ip route 10.42.0.0 255.255.0.0 200.0.0.42 254
+ ip route 10.51.0.0 255.255.0.0 200.0.0.51 254
+ ip route 10.52.0.0 255.255.0.0 200.0.0.52 254
+ ip route 10.61.0.0 255.255.0.0 200.0.0.61 254
+ ip route 10.62.0.0 255.255.0.0 200.0.0.62 254
+ ip route 10.71.0.0 255.255.0.0 200.0.0.71 254
+ ip route 10.72.0.0 255.255.0.0 200.0.0.72 254
+ ip route 10.81.0.0 255.255.0.0 200.0.0.81 254
+ ip route 10.82.0.0 255.255.0.0 200.0.0.82 254
+ ip route 10.91.0.0 255.255.0.0 200.0.0.91 254
+ ip route 10.92.0.0 255.255.0.0 200.0.0.92 254
+ ip route 10.#$34T#.0.0 255.255.0.0 10.#$34T#.#$34T#.4 254
+ !
+ no ip route 10.#$34T#.0.0 255.255.0.0 200.0.0.#$34T# 254
+ !
+ !
+ ipv6 route fd00::10:11:0:0/96  fd00::200:0:0:11 254
+ ipv6 route fd00::10:12:0:0/96  fd00::200:0:0:12 254
+ ipv6 route fd00::10:21:0:0/96  fd00::200:0:0:21 254
+ ipv6 route fd00::10:22:0:0/96  fd00::200:0:0:22 254
+ ipv6 route fd00::10:31:0:0/96  fd00::200:0:0:31 254
+ ipv6 route fd00::10:32:0:0/96  fd00::200:0:0:32 254
+ ipv6 route fd00::10:41:0:0/96  fd00::200:0:0:41 254
+ ipv6 route fd00::10:42:0:0/96  fd00::200:0:0:42 254
+ ipv6 route fd00::10:51:0:0/96  fd00::200:0:0:51 254
+ ipv6 route fd00::10:52:0:0/96  fd00::200:0:0:52 254
+ ipv6 route fd00::10:61:0:0/96  fd00::200:0:0:61 254
+ ipv6 route fd00::10:62:0:0/96  fd00::200:0:0:62 254
+ ipv6 route fd00::10:71:0:0/96  fd00::200:0:0:71 254
+ ipv6 route fd00::10:72:0:0/96  fd00::200:0:0:72 254
+ ipv6 route fd00::10:81:0:0/96  fd00::200:0:0:81 254
+ ipv6 route fd00::10:82:0:0/96  fd00::200:0:0:82 254
+ ipv6 route fd00::10:91:0:0/96  fd00::200:0:0:91 254
+ ipv6 route fd00::10:92:0:0/96  fd00::200:0:0:92 254
+ ipv6 route fd00::10:#$34T#:0:0/96  fd00::10:#$34T#:#$34T#:4 254
+ !
+ no ipv6 route fd00::10:#$34T#:0:0/96  fd00::200:0:0:#$34T# 254
+ end
+
+!@ospf routing EDGE
+conf t
+ router ospf 1
+  router-id #$34T#.0.0.1
+  network 200.0.0.0 0.0.0.255 area 0
+  network 10.#$34T#.#$34T#.0 0.0.0.255 area 0
+  network #$34T#.0.0.1 0.0.0.0 area 0
+ int gi 0/0/0
+  ip ospf network point-to-point
+end
+
+!@ospfv3 routing EDGE
+conf t
+ ipv6 router ospf 6
+  router-id #$34T#.0.0.1
+  passive-interface default
+  no passive-interface g0/0/0
+  no passive-interface g0/0/1
+  exit
+ int loopback 0
+  ipv6 ospf 6 area 0
+  exit
+ int g0/0/0
+  ipv6 ospf 6 area 0
+  ipv6 ospf network point-to-point
+  exit
+ int g0/0/1
+  ipv6 ospf 6 area 0
+  exit
+end
+
+!@windowsCMD
+route  add   10.0.0.0   mask   255.0.0.0    10.#$34T#.1.4
+route  add  200.0.0.0   mask  255.255.255.0   10.#$34T#.1.4
+route  add  fd00::10:0:0:0/80   fd00::10:#$34T#:1:4
+route  add  fd00::200:0:0:0/80  fd00::10:#$34T#:1:4
+
+
+************** OSPF Routing Only **************
+
+!OSPF routing
+!@edge
+conf t
+router ospf 1
+router-id #$34T#.0.0.1
+network 200.0.0.0 0.0.0.255 area 0
+network 10.#$34T#.#$34T#.0 0.0.0.255 area 0
+network #$34T#.0.0.1 0.0.0.0 area 0
+int gi 0/0/0
+ip ospf network point-to-point
+end
+
+!@CoreBABA
+conf t
+router ospf 1
+router-id 10.#$34T#.#$34T#.4
+network 10.#$34T#.0.0 0.0.255.255 area 0
+int gi 0/1
+ip ospf network point-to-point
+end
+
+!@CUCM
+conf t
+router ospf 1
+router-id 10.#$34T#.100.8
+network 10.#$34T#.100.0 0.0.0.255 area 0
+end
+
+
+
+!@ospfv3 routing CoreBABA
+conf t
+ ipv6 router ospf 6
+  router-id 10.#$34T#.#$34T#.4
+  passive-interface default
+  no passive-interface vlan 1
+  no passive-interface vlan 100
+  no passive-interface g0/1
+  exit
+ int g0/1
+  ipv6 ospf 6 area 0
+  ipv6 ospf network point-to-point
+ int vlan 1
+  ipv6 ospf 6 area 0
+ int vlan 10
+  ipv6 ospf 6 area 0
+ int vlan 50
+  ipv6 ospf 6 area 0
+ int vlan 100
+  ipv6 ospf 6 area 0
+  end
+  
+!@ospfv3 routing CUCM
+conf t
+ ipv6 router ospf 6
+  router-id 10.#$34T#.100.8
+  exit
+ int fa0/0
+  ipv6 ospf 6 area 0
+  end
+  
+!@ospfv3 routing EDGE
+conf t
+ ipv6 router ospf 6
+  router-id #$34T#.0.0.1
+  passive-interface default
+  no passive-interface g0/0/0
+  no passive-interface g0/0/1
+  exit
+ int loopback 0
+  ipv6 ospf 6 area 0
+  exit
+ int g0/0/0
+  ipv6 ospf 6 area 0
+  ipv6 ospf network point-to-point
+  exit
+ int g0/0/1
+  ipv6 ospf 6 area 0
+  exit
+end 
+  
+************** Trunking and Etherchannel **************
+
+!@CoreBABA, CoreTAAS
+conf t
+ int range fa0/10-12
+  switchport trunk encapsulation dot1q
+  switchport mode trunk
+  channel-group 1 mode active
+  channel-protocol lacp
+  end
+  
+
+************** VOIP Services **************
+
+!@CUCM - Interactive Voice Response System
+config t
+dial-peer voice 69 voip
+ service rivanaa out-bound
+ destination-pattern #$34T#69
+ session target ipv4:10.#$34T#.100.1
+ incoming called-number #$34T#69
+ dtmf-relay h245-alphanumeric
+ codec g711ulaw
+ no vad
+!
+telephony-service
+ moh "flash:/en_bacd_music_on_hold.au"
+!
+application
+ service rivanaa flash:app-b-acd-aa-3.0.0.2.tcl
+  paramspace english index 1        
+  param number-of-hunt-grps 2
+  param dial-by-extension-option 8
+  param handoff-string rivanaa
+  param welcome-prompt flash:en_bacd_welcome.au
+  paramspace english language en
+  param call-retry-timer 15
+  param service-name rivanqueue
+  paramspace english location flash:
+  param second-greeting-time 60
+  param max-time-vm-retry 2
+  param voice-mail 1234
+  param max-time-call-retry 700
+  param aa-pilot #$34T#69
+ service rivanqueue flash:app-b-acd-3.0.0.2.tcl
+  param queue-len 15
+  param aa-hunt1 #$34T#00
+  param aa-hunt2 #$34T#77
+  param aa-hunt3 #$34T#01
+  param aa-hunt4 #$34T#33
+  param queue-manager-debugs 1
+  param number-of-hunt-grps 4
+  end
+
+!@CUCM
+config t
+dial-peer voice 696 voip
+ service rivanaa out-bound
+ destination-pattern #$34T#69
+ session target ipv6:[fd00::10:#$34T#:100:1]
+ incoming called-number #$34T#69
+ dtmf-relay h245-alphanumeric
+ codec g711ulaw
+ no vad
+ end
+
+
+
+!@CUCM - Session Initiation Protocol
+conf t
+ voice service voip
+  allow-connections h323 to sip
+  allow-connections sip to h323
+  allow-connections sip to sip
+  supplementary-service h450.12
+ sip
+   bind all source-interface fa0/0 ipv6-address fd00::10:#$34T#:100:8
+   registrar server expires max 600 min 60
+ voice register global
+  mode cme
+  source-address 10.#$34T#.100.8 port 5060
+  max-dn 12
+  max-pool 12
+  authenticate register
+  create profile sync syncinfo.xml
+ voice register dn 1
+   number #$34T#23
+   allow watch
+   name #$34T#23
+ voice register dn 2
+   number #$34T#24
+   allow watch
+   name #$34T#24
+  voice register pool 1
+    id mac #mym0bilemac#
+    number 1 dn 1
+    dtmf-relay sip-notify
+    username #$34T#23 password #$34T#23
+    codec g711ulaw
+  voice register pool 2
+    id mac #othm0bilemac#
+    number 1 dn 2
+    dtmf-relay sip-notify
+    username #$34T#32 password #$34T#32
+    codec g711ulaw
+	end
+
+************** Modify Analog Phone Features **************
+
+!@CUCM
+conf t
+ voice-port 0/0/0
+  signal loopstart
+  caller-id enable
+  station-id name ANALOG1
+  cptone PH  / US
+ exit
+ dial-peer voice 1 pots
+  destination-pattern #$34T#00
+   port 0/0/0
+   end
+ csim start #$34T#00
+
+!@CUCM
+conf t
+ class-map voip
+  match ip dscp  ?
+ voice register global
+  ip qos dscp ef ?
+ telephony-service
+  ip qos dscp ef ?
+
+
+
+
+************** SIP Phone CP-8851 Config **************
+
+!@CoreTAAS,CoreBABA
+conf t
+ vlan 101
+  name SIP
+  end
+
+!@CoreTAAS
+conf t
+ int vlan 101
+  ip add 10.#$34T#.101.2 255.255.255.0
+  ipv6 add fd00::10:#$34T#:101:2/120
+  no shut
+  exit
+ int range fa0/5,fa0/7
+  switchport mode access
+  switchport access vlan 1
+  switchport voice vlan 101
+  end
+
+!@CoreBABA
+conf t
+ int vlan 101
+  ip add 10.#$34T#.101.4 255.255.255.0
+  ipv6 add fd00::10:#$34T#:101:4/120
+  ipv6 dhcp server POOLSIPv6
+  ipv6 nd managed-config-flag
+  ipv6 nd other-config-flag
+  no shut
+  exit
+ ip dhcp excluded-address 10.#$34T#.101.1 10.#$34T#.101.100
+ ip dhcp pool POOLSIP
+  network 10.#$34T#.101.0 255.255.255.0
+  default-router 10.#$34T#.101.4
+  domain-name VOICEDATASIP.COM
+  dns-server 10.#$34T#.1.10
+  option 150 ip 10.#$34T#.#$34T#.1
+  option 120 ip 10.#$34T#.#$34T#.1
+  exit
+ !
+ ipv6 dhcp pool POOLSIPv6
+  address prefix fd00::10:#$34T#:101:0/120
+  domain-name SIP.COM
+  dns-server fd00::10:#$34T#:1:10
+  sip address fd00::10:#$34T#:#$34T#:1
+  end
+
+!@EDGE/CSR - Communications Manager Express - SIP
+conf t
+ ntp master 1
+ !
+ no ip tftp source-interface gi0
+ ip tftp source-interface gi0/0/0
+ !
+ voice register global
+  mode cme
+  exit
+ !
+ voice service voip
+  allow-connections sip to sip
+  allow-connections h323 to sip
+  allow-connections sip to h323
+  supplementary-service h450.12
+  !
+  ip address trusted list
+   ipv4 0.0.0.0  0.0.0.0
+   ipv6 fd00::/0
+   exit
+  sip
+   silent-discard untrusted
+   header-passing
+   registrar server expires max 120 min 60
+   bind all source-interface Gi0/0/0 ipv6-address fd00::10:#$34T#:#$34T#:1
+   exit
+  exit
+ voice register global
+  source-address 10.#$34T#.#$34T#.1 port 5060
+  max-dn 40
+  max-pool 12
+  authenticate register
+  ntp-server 10.#$34T#.#$34T#.1
+  create profile sync syncinfo.xml
+  exit
+ voice register dn 1
+  number #$34T#211
+  name #$34T#211
+  allow watch
+ voice register dn 2
+  number #$34T#222
+  name #$34T#222
+  allow watch
+ voice register dn 3
+  number #$34T#233
+  name #$34T#233
+  allow watch
+ voice register dn 4
+  number #$34T#244
+  name #$34T#244
+  allow watch
+ voice register dn 5
+  number #$34T#255
+  name #$34T#255
+  allow watch
+ voice register dn 6
+  number #$34T#266
+  name #$34T#266
+  allow watch
+ voice register dn 7
+  number #$34T#277
+  name #$34T#277
+  allow watch
+ voice register dn 8
+  number #$34T#288
+  name #$34T#288
+  allow watch
+ voice register dn 9
+  number #$34T#299
+  name #$34T#299
+  allow watch
+ voice register dn 10
+  number #$34T#267
+  name #$34T#267
+  allow watch
+ voice register dn 11
+  number #$34T#2111
+  name #$34T#111
+  allow watch
+ voice register dn 12
+  number #$34T#2221
+  name #$34T#221
+  allow watch
+ voice register dn 13
+  number #$34T#2331
+  name #$34T#331
+  allow watch
+ voice register dn 14
+  number #$34T#2441
+  name #$34T#441
+  allow watch
+ voice register dn 15
+  number #$34T#2551
+  name #$34T#551
+  allow watch
+ voice register dn 16
+  number #$34T#2661
+  name #$34T#661
+  allow watch
+ voice register dn 17
+  number #$34T#2771
+  name #$34T#771
+  allow watch
+ voice register dn 18
+  number #$34T#2881
+  name #$34T#881
+  allow watch
+ voice register dn 19
+  number #$34T#2991
+  name #$34T#991
+  allow watch
+ voice register dn 20
+  number #$34T#2671
+  name #$34T#671
+  allow watch
+  exit
+ !
+ voice register pool 1
+  id mac #sip1macadd#
+  number 1 dn 1
+  number 2 dn 2
+  number 3 dn 3
+  number 4 dn 4
+  number 5 dn 5
+  number 6 dn 6
+  number 7 dn 7
+  number 8 dn 8
+  number 9 dn 9
+  number 10 dn 10
+  dtmf-relay rtp-nte
+  codec g711ulaw
+  username #$34T#Passa password #$34T#Passa
+  ! video
+  type 8851
+ voice register pool 2
+  id mac #sip2macadd#
+  number 1 dn 11
+  number 2 dn 12
+  number 3 dn 13
+  number 4 dn 14
+  number 5 dn 15
+  number 6 dn 16
+  number 7 dn 17
+  number 8 dn 18
+  number 9 dn 19
+  number 10 dn 20
+  dtmf-relay rtp-nte
+  codec g711ulaw
+  username #$34T#Passb password #$34T#Passb
+  type 8851
+  ! video
+  exit
+ voice register global
+  create profile sync syncinfo.xml
+  restart
+  apply-config
+  end
+
+
+!@CUCM
+conf t
+ dial-peer voice 100 voip
+  destination-pattern #$34T#2..
+  session protocol sipv2
+  session target ipv4:10.#$34T#.#$34T#.1
+  codec g711ulaw
+  dtmf-relay rtp-nte
+  no vad
+  exit
+ !
+ dial-peer voice 110 Voip
+  destination-pattern 112..
+  session protocol sipv2
+  session target ipv4:10.11.11.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 120 Voip
+  destination-pattern 122..
+  session protocol sipv2
+  session target ipv4:10.12.12.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 210 Voip
+  destination-pattern 212..
+  session protocol sipv2
+  session target ipv4:10.21.21.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 220 Voip
+  destination-pattern 222..
+  session protocol sipv2
+  session target ipv4:10.22.22.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 310 Voip
+  destination-pattern 312..
+  session protocol sipv2
+  session target ipv4:10.31.31.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 320 Voip
+  destination-pattern 322..
+  session protocol sipv2
+  session target ipv4:10.32.32.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 410 Voip
+  destination-pattern 412..
+  session protocol sipv2
+  session target ipv4:10.41.41.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 420 Voip
+  destination-pattern 422..
+  session protocol sipv2
+  session target ipv4:10.42.42.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 510 Voip
+  destination-pattern 512..
+  session protocol sipv2
+  session target ipv4:10.51.51.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 520 Voip
+  destination-pattern 522..
+  session protocol sipv2
+  session target ipv4:10.52.52.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 610 Voip
+  destination-pattern 612..
+  session protocol sipv2
+  session target ipv4:10.61.61.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 620 Voip
+  destination-pattern 622..
+  session protocol sipv2
+  session target ipv4:10.62.62.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 710 Voip
+  destination-pattern 712..
+  session protocol sipv2
+  session target ipv4:10.71.71.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 720 Voip
+  destination-pattern 722..
+  session protocol sipv2
+  session target ipv4:10.72.72.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 810 Voip
+  destination-pattern 812..
+  session protocol sipv2
+  session target ipv4:10.81.81.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 820 Voip
+  destination-pattern 822..
+  session protocol sipv2
+  session target ipv4:10.82.82.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 910 Voip
+  destination-pattern 912..
+  session protocol sipv2
+  session target ipv4:10.91.91.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 920 Voip
+  destination-pattern 922..
+  session protocol sipv2
+  session target ipv4:10.92.92.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+  exit
+ no dial-peer voice #$34T#0 Voip
+ end
+
+
+!@EDGE
+conf t
+ dial-peer voice 100 voip
+  destination-pattern #$34T#1..
+  session protocol sipv2
+  session target ipv4:10.#$34T#.100.8
+  codec g711ulaw
+  dtmf-relay rtp-nte
+  no vad
+  exit
+ !
+ dial-peer voice 11 Voip
+  destination-pattern 111..
+  session protocol sipv2
+  session target ipv4:10.11.100.8
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 12 Voip
+  destination-pattern 121..
+  session protocol sipv2
+  session target ipv4:10.12.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 21 Voip
+  destination-pattern 211..
+  session protocol sipv2
+  session target ipv4:10.21.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 22 Voip
+  destination-pattern 221..
+  session protocol sipv2
+  session target ipv4:10.22.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 31 Voip
+  destination-pattern 311..
+  session protocol sipv2
+  session target ipv4:10.31.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 32 Voip
+  destination-pattern 321..
+  session protocol sipv2
+  session target ipv4:10.32.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 41 Voip
+  destination-pattern 411..
+  session protocol sipv2
+  session target ipv4:10.41.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 42 Voip
+  destination-pattern 421..
+  session protocol sipv2
+  session target ipv4:10.42.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 51 Voip
+  destination-pattern 511..
+  session protocol sipv2
+  session target ipv4:10.51.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 52 Voip
+  destination-pattern 521..
+  session protocol sipv2
+  session target ipv4:10.52.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 61 Voip
+  destination-pattern 611..
+  session protocol sipv2
+  session target ipv4:10.61.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 62 Voip
+  destination-pattern 621..
+  session protocol sipv2
+  session target ipv4:10.62.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 71 Voip
+  destination-pattern 711..
+  session protocol sipv2
+  session target ipv4:10.71.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 72 Voip
+  destination-pattern 721..
+  session protocol sipv2
+  session target ipv4:10.72.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 81 Voip
+  destination-pattern 811..
+  session protocol sipv2
+  session target ipv4:10.81.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 82 Voip
+  destination-pattern 821..
+  session protocol sipv2
+  session target ipv4:10.82.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 91 Voip
+  destination-pattern 911..
+  session protocol sipv2
+  session target ipv4:10.91.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+ dial-peer voice 92 Voip
+  destination-pattern 921..
+  session protocol sipv2
+  session target ipv4:10.92.100.8
+  dtmf-relay rtp-nte
+  no vad
+  codec g711ULAW
+  exit
+ no dial-peer voice #$34T# Voip
+ !
+ ! - SIP to SIP
+ !
+ dial-peer voice 110 Voip
+  destination-pattern 112..
+  session protocol sipv2
+  session target ipv4:10.11.11.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 120 Voip
+  destination-pattern 122..
+  session protocol sipv2
+  session target ipv4:10.12.12.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 210 Voip
+  destination-pattern 212..
+  session protocol sipv2
+  session target ipv4:10.21.21.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 220 Voip
+  destination-pattern 222..
+  session protocol sipv2
+  session target ipv4:10.22.22.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 310 Voip
+  destination-pattern 312..
+  session protocol sipv2
+  session target ipv4:10.31.31.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 320 Voip
+  destination-pattern 322..
+  session protocol sipv2
+  session target ipv4:10.32.32.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 410 Voip
+  destination-pattern 412..
+  session protocol sipv2
+  session target ipv4:10.41.41.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 420 Voip
+  destination-pattern 422..
+  session protocol sipv2
+  session target ipv4:10.42.42.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 510 Voip
+  destination-pattern 512..
+  session protocol sipv2
+  session target ipv4:10.51.51.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 520 Voip
+  destination-pattern 522..
+  session protocol sipv2
+  session target ipv4:10.52.52.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 610 Voip
+  destination-pattern 612..
+  session protocol sipv2
+  session target ipv4:10.61.61.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 620 Voip
+  destination-pattern 622..
+  session protocol sipv2
+  session target ipv4:10.62.62.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 710 Voip
+  destination-pattern 712..
+  session protocol sipv2
+  session target ipv4:10.71.71.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 720 Voip
+  destination-pattern 722..
+  session protocol sipv2
+  session target ipv4:10.72.72.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 810 Voip
+  destination-pattern 812..
+  session protocol sipv2
+  session target ipv4:10.81.81.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 820 Voip
+  destination-pattern 822..
+  session protocol sipv2
+  session target ipv4:10.82.82.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 910 Voip
+  destination-pattern 912..
+  session protocol sipv2
+  session target ipv4:10.91.91.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+ dial-peer voice 920 Voip
+  destination-pattern 922..
+  session protocol sipv2
+  session target ipv4:10.92.92.1
+  codec g711ULAW
+  dtmf-relay rtp-nte
+  no vad
+  exit
+ no dial-peer voice #$34T#0 Voip
+ !
+ !
+ !
+ dial-peer voice 116 Voip
+  destination-pattern 11..
+  session target ipv6:[fd00::10:11:100:8]
+  codec g711ULAW
+ dial-peer voice 126 Voip
+  destination-pattern 12..
+  session target ipv6:[fd00::10:12:100:8]
+  codec g711ULAW
+ dial-peer voice 216 Voip
+  destination-pattern 21..
+  session target ipv6:[fd00::10:21:100:8]
+  codec g711ULAW
+ dial-peer voice 226 Voip
+  destination-pattern 22..
+  session target ipv6:[fd00::10:22:100:8]
+  codec g711ULAW
+ dial-peer voice 316 Voip
+  destination-pattern 31..
+  session target ipv6:[fd00::10:31:100:8]
+  codec g711ULAW
+ dial-peer voice 326 Voip
+  destination-pattern 32..
+  session target ipv6:[fd00::10:32:100:8]
+  codec g711ULAW
+ dial-peer voice 416 Voip
+  destination-pattern 41..
+  session target ipv6:[fd00::10:41:100:8]
+  codec g711ULAW
+ dial-peer voice 426 Voip
+  destination-pattern 42..
+  session target ipv6:[fd00::10:42:100:8]
+  codec g711ULAW
+ dial-peer voice 516 Voip
+  destination-pattern 51..
+  session target ipv6:[fd00::10:51:100:8]
+  codec g711ULAW
+ dial-peer voice 526 Voip
+  destination-pattern 52..
+  session target ipv6:[fd00::10:52:100:8]
+  codec g711ULAW
+ dial-peer voice 616 Voip
+  destination-pattern 61..
+  session target ipv6:[fd00::10:61:100:8]
+  codec g711ULAW
+ dial-peer voice 626 Voip
+  destination-pattern 62..
+  session target ipv6:[fd00::10:62:100:8]
+  codec g711ULAW
+ dial-peer voice 716 Voip
+  destination-pattern 71..
+  session target ipv6:[fd00::10:71:100:8]
+  codec g711ULAW
+ dial-peer voice 726 Voip
+  destination-pattern 72..
+  session target ipv6:[fd00::10:72:100:8]
+  codec g711ULAW
+ dial-peer voice 816 Voip
+  destination-pattern 81..
+  session target ipv6:[fd00::10:81:100:8]
+  codec g711ULAW
+ dial-peer voice 826 Voip
+  destination-pattern 82..
+  session target ipv6:[fd00::10:82:100:8]
+  codec g711ULAW
+ dial-peer voice 916 Voip
+  destination-pattern 91..
+  session target ipv6:[fd00::10:91:100:8]
+  codec g711ULAW
+ dial-peer voice 926 Voip
+  destination-pattern 92..
+  session target ipv6:[fd00::10:92:100:8]
+  codec g711ULAW
+  end
+
+Show Commands
+1. show voice register global
+2. show voice register pool
+3. show sip-ua register status
+4. show voice call summary
+5. show voice register tftp-bind
+
+
+SIP Flow operation
+1. Phone obtains IP from DHCP
+2. Phone discovers TFTP server
+3. Phone downloads XML config
+4. Phone sends SIP REGISTER to router
+5. Router authenticates phone
+6. Phone becomes available for calls
+
+************** NAT with NAT0 **************
+
+!@edge
+conf t
+ int g0/0/0 
+  ip nat inside
+  exit
+ int g0/0/1
+  ip nat outside
+  end
+
+!@edge
+conf t
+ ip access-list extended NAT-POLICY
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.11.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.12.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.21.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.22.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.31.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.32.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.41.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.42.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.51.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.52.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.61.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.62.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.71.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.72.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.81.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.82.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.91.0.0 0.0.255.255
+  deny ip 10.#$34T#.0.0 0.0.255.255 10.92.0.0 0.0.255.255
+  no deny ip 10.#$34T#.0.0 0.0.255.255 10.#$34T#.0.0 0.0.255.255
+  permit ip any any
+  end
+
+!@edge
+conf t
+ ip nat inside source list NAT-POLICY int g0/0/1 overload
+ ip route 0.0.0.0 0.0.0.0 200.0.0.1
+ end
+
+!@edge
+conf t
+ no router ospf 1
+ router ospf 1
+  router-id #$34T#.0.0.1
+  network 10.#$34T#.#$34T#.0 0.0.0.255 area 0
+  default-information originate always
+  end
+
+!@edge
+conf t
+ ip name-server 10.#$34T#.1.10   !8.8.8.8 8.8.4.4
+ ip domain lookup
+ ip domain lookup source-int g0/0/0
+ end
+
+
+************** mGRE Tunnel (Full Mesh) **************
+
+!@edge
+conf t
+ int tun1
+  ip add 172.16.1.#$34T# 255.255.255.0
+  tunnel source g0/0/1
+  tunnel mode gre multipoint
+  no shut
+  tun key 123
+  ip nhrp authentication C1sc0123
+  ip nhrp map multicast dynamic
+  ip nhrp network-id 1337
+  ip nhrp map 172.16.1.11 200.0.0.11
+  ip nhrp map 172.16.1.12 200.0.0.12
+  ip nhrp map 172.16.1.21 200.0.0.21
+  ip nhrp map 172.16.1.22 200.0.0.22
+  ip nhrp map 172.16.1.31 200.0.0.31
+  ip nhrp map 172.16.1.32 200.0.0.32
+  ip nhrp map 172.16.1.41 200.0.0.41
+  ip nhrp map 172.16.1.42 200.0.0.42
+  ip nhrp map 172.16.1.51 200.0.0.51
+  ip nhrp map 172.16.1.52 200.0.0.52
+  ip nhrp map 172.16.1.61 200.0.0.61
+  ip nhrp map 172.16.1.62 200.0.0.62
+  ip nhrp map 172.16.1.71 200.0.0.71
+  ip nhrp map 172.16.1.72 200.0.0.72
+  ip nhrp map 172.16.1.81 200.0.0.81
+  ip nhrp map 172.16.1.82 200.0.0.82
+  ip nhrp map 172.16.1.91 200.0.0.91
+  ip nhrp map 172.16.1.92 200.0.0.92
+  no ip nhrp map 172.16.1.#$34T# 200.0.0.#$34T#
+  end
+
+!@edge
+conf t
+ ip route 10.11.0.0 255.255.0.0 172.16.1.11 252
+ ip route 10.12.0.0 255.255.0.0 172.16.1.12 252
+ ip route 10.21.0.0 255.255.0.0 172.16.1.21 252
+ ip route 10.22.0.0 255.255.0.0 172.16.1.22 252
+ ip route 10.31.0.0 255.255.0.0 172.16.1.31 252
+ ip route 10.32.0.0 255.255.0.0 172.16.1.32 252
+ ip route 10.41.0.0 255.255.0.0 172.16.1.41 252
+ ip route 10.42.0.0 255.255.0.0 172.16.1.42 252
+ ip route 10.51.0.0 255.255.0.0 172.16.1.51 252
+ ip route 10.52.0.0 255.255.0.0 172.16.1.52 252
+ ip route 10.61.0.0 255.255.0.0 172.16.1.61 252
+ ip route 10.62.0.0 255.255.0.0 172.16.1.62 252
+ ip route 10.71.0.0 255.255.0.0 172.16.1.71 252
+ ip route 10.72.0.0 255.255.0.0 172.16.1.72 252
+ ip route 10.81.0.0 255.255.0.0 172.16.1.81 252
+ ip route 10.82.0.0 255.255.0.0 172.16.1.82 252
+ ip route 10.91.0.0 255.255.0.0 172.16.1.91 252
+ ip route 10.92.0.0 255.255.0.0 172.16.1.92 252
+ !
+ no ip route 10.#$34T#.0.0 255.255.0.0 172.16.1.#$34T# 252
+ end

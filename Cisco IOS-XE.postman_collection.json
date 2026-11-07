@@ -1,0 +1,1788 @@
+{
+	"info": {
+		"_postman_id": "5cff0689-8d8f-4b13-b02d-dd8a8488b6e4",
+		"name": "Cisco IOS-XE",
+		"description": "The Postman collections for Cisco IOS XE allow you to configure the HTTP-based Representational State Transfer Configuration Protocol (RESTCONF). RESTCONF provides a programmatic interface based on standard mechanisms for accessing configuration data, state data, data-model-specific Remote Procedure Call (RPC) operations and events, defined in the YANG model.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "0"
+	},
+	"item": [
+		{
+			"name": "RESTCONF",
+			"item": [
+				{
+					"name": "Operational State interfaces",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-interfaces:interfaces-state/",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-interfaces:interfaces-state",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read the top level REST resource",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/.well-known/host-meta",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								".well-known",
+								"host-meta"
+							]
+						},
+						"description": "/api is the top level REST resource.\nReading this resource shows what datastores\nare available and what operations are available.\n\nOperations are executed by sending a GET command\nto the URL identified for the operation."
+					},
+					"response": []
+				},
+				{
+					"name": "Configure ietf-interfaces single interface",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ietf-interfaces:interface\": {\n        \"name\": \"GigabitEthernet2\",\n        \"description\": \"Configured by RESTCONF\",\n        \"type\": \"iana-if-type:ethernetCsmacd\",\n        \"enabled\": true,\n        \"ietf-ip:ipv4\": {\n            \"address\": [\n                {\n                    \"ip\": \"10.255.255.1\",\n                    \"netmask\": \"255.255.255.0\"\n                }\n            ]\n        }\n    }\n}"
+						},
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-interfaces:interfaces/interface=GigabitEthernet2",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-interfaces:interfaces",
+								"interface=GigabitEthernet2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read Top Level RESTCONF",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read models implemented by the device",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Body matches string\"] = responseBody.has(\"interface\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/netconf-state/capabilities",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"netconf-state",
+								"capabilities"
+							]
+						},
+						"description": "This command reads a subset of the information available\nin the ietf-netconf-monitoring model.  The information returned\nis the list of all models, revisions, deviations on this device.\n\nUsing this command is the definitive way to determine the exact\nimplementation and versions on the device.  This information can\nbe used by an intelligent management client to make decisions\non how to use the RESTCONF interface.\n\nThis example for the ietf-interfaces model identifies the \nrevision data as 5.8.2014 and lists specific feature options\nsupported and also the name of the module applying deviations \nthat change the information exposed by the model.\n\n      \"urn:ietf:params:xml:ns:yang:\n      ietf-interfaces?module=ietf-interfaces&\n      revision=2014-05-08&features=pre-provisioning,if-mib,\n      arbitrary-names&deviations=ietf-ip-devs\",\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Read ietf-yang-library",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Body matches string\"] = responseBody.has(\"interface\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-yang-library:modules-state",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-yang-library:modules-state"
+							]
+						},
+						"description": "This command reads a subset of the information available\nin the ietf-netconf-monitoring model.  The information returned\nis the list of all models, revisions, deviations on this device.\n\nUsing this command is the definitive way to determine the exact\nimplementation and versions on the device.  This information can\nbe used by an intelligent management client to make decisions\non how to use the RESTCONF interface.\n\nThis example for the ietf-interfaces model identifies the \nrevision data as 5.8.2014 and lists specific feature options\nsupported and also the name of the module applying deviations \nthat change the information exposed by the model.\n\n      \"urn:ietf:params:xml:ns:yang:\n      ietf-interfaces?module=ietf-interfaces&\n      revision=2014-05-08&features=pre-provisioning,if-mib,\n      arbitrary-names&deviations=ietf-ip-devs\",\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Read ietf-interfaces list of interfaces",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-interfaces:interfaces",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-interfaces:interfaces"
+							]
+						},
+						"description": "This message uses the ietf-interface model to read\na list of the names of each interface managed using\nthe model.  The model mapping infrastructure converts\nthe native model configuration into the form defined\nby the ietf-interfaces common model\n\n{\n  \"ietf-interfaces:interfaces\": {\n    \"interface\": [\n      {\n        \"name\": \"FastEthernet0/0/0\"\n      },\n      {\n        \"name\": \"FastEthernet0/0/1\"\n      },\n      {\n        \"name\": \"FastEthernet0/0/2\"\n      },"
+					},
+					"response": []
+				},
+				{
+					"name": "Read ietf-interfaces single interface",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-interfaces:interfaces/interface=GigabitEthernet2",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-interfaces:interfaces",
+								"interface=GigabitEthernet2"
+							]
+						},
+						"description": "This reads a single interface from the IOS XE box which already has been configured as a 802.1Q subinterface"
+					},
+					"response": []
+				},
+				{
+					"name": "Add new loopback interface",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ietf-interfaces:interface\": {\n        \"name\": \"Loopback100\",\n        \"description\": \"Configured by RESTCONF\",\n        \"type\": \"iana-if-type:softwareLoopback\",\n        \"enabled\": true,\n        \"ietf-ip:ipv4\": {\n            \"address\": [\n                {\n                    \"ip\": \"172.16.100.1\",\n                    \"netmask\": \"255.255.255.0\"\n                }\n            ]\n        }\n    }\n}"
+						},
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-interfaces:interfaces",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-interfaces:interfaces"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Loopback Interface",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-interfaces:interfaces/interface=Loopback100",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-interfaces:interfaces",
+								"interface=Loopback100"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Read native device single interface",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/Cisco-IOS-XE-native:native/interface/GigabitEthernet=2",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"Cisco-IOS-XE-native:native",
+								"interface",
+								"GigabitEthernet=2"
+							]
+						},
+						"description": "This reads a single interface from the IOS XE box which already has been configured as a 802.1Q subinterface\nIt uses the native device model (e.g. NED, network element driver)"
+					},
+					"response": []
+				},
+				{
+					"name": "Read native hostname",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/Cisco-IOS-XE-native:native/hostname",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"Cisco-IOS-XE-native:native",
+								"hostname"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve the Server Module Information",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Body matches string\"] = responseBody.has(\"interface\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-yang-library:modules-state",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-yang-library:modules-state"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Retrieve RESTCONF Monitoring Capabilities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Body matches string\"] = responseBody.has(\"interface\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/ietf-restconf-monitoring:restconf-state/capabilities",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"ietf-restconf-monitoring:restconf-state",
+								"capabilities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Filter Fields Returned in Response",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/data/Cisco-IOS-XE-native:native/interface/GigabitEthernet=2?fields=Cisco-IOS-XE-native:GigabitEthernet(name;description;ip)&depth=unbounded",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"data",
+								"Cisco-IOS-XE-native:native",
+								"interface",
+								"GigabitEthernet=2"
+							],
+							"query": [
+								{
+									"key": "fields",
+									"value": "Cisco-IOS-XE-native:GigabitEthernet(name;description;ip)"
+								},
+								{
+									"key": "depth",
+									"value": "unbounded"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "IOS XE Save Configuration RPC",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"tests[\"Body matches string\"] = responseBody.has(\"interface\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/yang-data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic cm9vdDpEX1ZheSFfMTAm"
+							}
+						],
+						"url": {
+							"raw": "https://{{host}}:{{port}}/restconf/operations/cisco-ia:save-config/",
+							"protocol": "https",
+							"host": [
+								"{{host}}"
+							],
+							"port": "{{port}}",
+							"path": [
+								"restconf",
+								"operations",
+								"cisco-ia:save-config",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "YangCatalog",
+			"item": [
+				{
+					"name": "Return all metadata for specific module in the catalog",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "https://yangcatalog.org/api/search/modules/ietf-l3vpn-svc,2018-01-19,ietf",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search",
+								"modules",
+								"ietf-l3vpn-svc,2018-01-19,ietf"
+							]
+						},
+						"description": "This will search for a specific module and it will produce all the details about the module that yangcatalog contains\n\n/search/modules/<name>,<revision>,<organization>\n\nNote that there are 3 indices"
+					},
+					"response": []
+				},
+				{
+					"name": "Return all YANG modules in the catalog",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/search/modules",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search",
+								"modules"
+							]
+						},
+						"description": "Search for all the modules in yangcatalog\n\nWarning!!!\nThis might take a long time since there might be a lot of data\n\nOn Dec 2017, we speak about 2878 YANG modules, with some of them having multiple revisions."
+					},
+					"response": []
+				},
+				{
+					"name": "Return all YANG modules for the ISR4000 running IOS 16.6.2",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/search/vendors/vendor/cisco/platforms/platform/ISR4000/software-versions/software-version/16.6.2",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search",
+								"vendors",
+								"vendor",
+								"cisco",
+								"platforms",
+								"platform",
+								"ISR4000",
+								"software-versions",
+								"software-version",
+								"16.6.2"
+							]
+						},
+						"description": "Searching for all the modules for a specific vendor. This will not produce all the module details. You can search for any part of this request as a example you can serach for vendor cisco and it will produce response with all the platforms, versions and flavors.\n/search/vendors/vendor/<vendor-id>/platforms/platform/<platform-id>/software-versions/software-version/<software-version-id>/software-flavors/software-flavor/<software-flavor-id>"
+					},
+					"response": []
+				},
+				{
+					"name": "Return all revisions of a specific YANG module",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/search/name/ietf-l3vpn-svc",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search",
+								"name",
+								"ietf-l3vpn-svc"
+							]
+						},
+						"description": "This way you can search for any specific entry in the yangcatalog\n\n/search/<yang-moodule-leaf>/<name>\n\n<yang-module-leaf> can be one of the following:\n'ietf/ietf-wg', 'maturity-level', 'document-name', 'author-email', 'compilation-status', 'namespace', 'conformance-type', 'module-type', 'organization', 'yang-version', 'name', 'revision', 'tree-type', 'belongs-to', 'generated-from'\n\n<name> needs to be anything you are looking for"
+					},
+					"response": []
+				},
+				{
+					"name": "Check semantic differences between ISR4000 IOS 16.6.1 and 16.6.2",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"input\": {\n      \"old\":{\n    \"implementations\": {\n        \"implementation\" :[\n        {\n           \"vendor\": \"cisco\", \n           \"software-version\": \"16.6.1\",\n           \"platform\": \"ISR4000\"\n        }]\n    }\n     },\n     \n    \"new\": {\n    \"implementations\": {\n        \"implementation\" :[\n        {\n           \"vendor\": \"cisco\", \n           \"software-version\": \"16.6.2\",\n           \"platform\": \"ISR4000\"\n        }]\n    }\n    }\n   }\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/check-semantic-version",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"check-semantic-version"
+							]
+						},
+						"description": "This request requires a body with root input element that contains two child elements. Old and new. In those elements you can specify any condition you want from your modules and it will produce a list of modules that are same in old and new container but have different semantic version. It will also produce a information of why the semantic version is different as well as diff of yang tree and yang module itself"
+					},
+					"response": []
+				},
+				{
+					"name": "Check sematic difference for same module with different revision",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"input\": {\n        \"old\":{\n            \"name\": \"Cisco-IOS-XE-policy\",\n            \"revision\": \"2017-06-07\",\n            \"organization\": \"cisco\"\n        },\n     \n        \"new\": {\n            \"name\": \"Cisco-IOS-XE-policy\",\n            \"revision\": \"2017-08-21\",\n            \"organization\": \"cisco\"\n        }\n   }\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/check-semantic-version",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"check-semantic-version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return all YANG modules and metadata for IOS XE 16.6.2",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"input\":{\n      \"implementations\":{\n         \"implementation\":[\n            {\n               \"vendor\":\"cisco\",\n               \"software-version\":\"16.6.2\"\n            }\n         ]\n      }\n   }\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/search-filter",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search-filter"
+							]
+						},
+						"description": "This is a request that needs to have body specified with root named input and its child should contain any conditions that output module needs to meet. These conditions must be compliant with yang-catalog.yang module."
+					},
+					"response": []
+				},
+				{
+					"name": "For a specific IETF draft, provide the emails addresses of all dependent YANG modules",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input\":{\n    \"dependencies\": [{\n    \t\"name\": \"ietf-inet-types\"\n    }]\n  }\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/search-filter/author-email",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search-filter",
+								"author-email"
+							]
+						},
+						"description": "This request is same as serach-filter exept it will produce set of names requested in the path. As an example this specific request will produce set of author-emails of the modules that has a dependencie on ietf-routing\n\n/search-filter/<yang-catalog-leaf>\n\n<yang-catalog-leaf> leaf that will be serched for"
+					},
+					"response": []
+				},
+				{
+					"name": "Search for all module names with ietf-routing dependencie",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": ""
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input\":{\n    \"dependencies\": [{\"name\": \"ietf-inet-types\"\n    }]\n  }\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/search-filter/name",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search-filter",
+								"name"
+							]
+						},
+						"description": "This request is same as serach-filter exept it will produce set of names requested in the path. As an example this specific request will produce set of author-emails of the modules that has a dependencie on ietf-routing\n\n/search-filter/<yang-catalog-leaf>\n\n<yang-catalog-leaf> leaf that will be serched for"
+					},
+					"response": []
+				},
+				{
+					"name": "Return all entries with the YANG module \"vendor\" branch",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/search/vendors",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search",
+								"vendors"
+							]
+						},
+						"description": "Search for all the vendors in yangcatalog"
+					},
+					"response": []
+				},
+				{
+					"name": "Return all YANG modules and all entries with the YANG module \"vendor\" branch",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/search/catalog",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search",
+								"catalog"
+							]
+						},
+						"description": "Search for all the data that are in yangcatalog\n\nWarning!!!\nThis might take a long time since there might be a lot of data"
+					},
+					"response": []
+				},
+				{
+					"name": "Return all vendors and organizations that contributed to yangcatalog",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/contributors",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"contributors"
+							]
+						},
+						"description": "This request requires a body with root input element that contains two child elements. Old and new. In those elements you can specify any condition you want from your modules and it will produce a list of modules that are same in old and new container but have different semantic version. It will also produce a information of why the semantic version is different as well as diff of yang tree and yang module itself"
+					},
+					"response": []
+				},
+				{
+					"name": "Return all latest revisions from IETF YANG modules",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/search/organization/ietf?latest-revision=True",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search",
+								"organization",
+								"ietf"
+							],
+							"query": [
+								{
+									"key": "latest-revision",
+									"value": "True"
+								}
+							]
+						},
+						"description": "Search for anything with \"?latest-revision=True\" argument for receiving only latest revision of each module\n"
+					},
+					"response": []
+				},
+				{
+					"name": "Return all latest revisions from IEEE YANG modules",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"input\": {\r\n  \"organization\": \"ieee\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/search-filter?latest-revision=True",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search-filter"
+							],
+							"query": [
+								{
+									"key": "latest-revision",
+									"value": "True"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return all YANG modules that are common between ISR4000 IOS 16.6.1 and 16.6.2",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/vnd.yang.data+json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n   \"input\": {\n      \"first\":{\n           \"implementations\": {\n               \"implementation\" :[{\n                    \"vendor\": \"cisco\", \n                    \"software-version\": \"16.6.1\",\n                    \"platform\": \"ISR4000\"\n                }]\n            }\n        },\n        \"second\": {\n           \"implementations\": {\n               \"implementation\" :[{\n                   \"vendor\": \"cisco\", \n                    \"software-version\": \"16.6.2\",\n                    \"platform\": \"ISR4000\"\n                }]\n            }\n        }\n    }\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/get-common",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"get-common"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return all IEEE YANG modules in the catalog",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"input\": {\r\n  \"organization\": \"ieee\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/search-filter",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search-filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return all IETF YANG modules in the catalog",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"input\": {\r\n  \"organization\": \"ietf\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/search-filter",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search-filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return all openconfig YANG modules for the ISR4000 IOS 16.6.2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"input\": {\r\n  \"organization\": \"openconfig\",\r\n  \"implementations\": {\r\n    \"implementation\" :[\r\n    {\r\n      \"vendor\": \"cisco\",\r\n      \"software-version\": \"16.6.2\",\r\n      \"platform\": \"ISR4000\"\r\n    }]\r\n    }\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/search-filter",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search-filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return all openconfig YANG modules in the catalog",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"input\": {\r\n  \"organization\": \"openconfig\"\r\n  }\r\n}"
+						},
+						"url": {
+							"raw": "https://yangcatalog.org/api/search-filter",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search-filter"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return only latest revision modules for ietf organization ",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46WUBuZ19hZG0xbi0+KHBhU1Mp"
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/search/organization/ietf?latest-revision=True",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"search",
+								"organization",
+								"ietf"
+							],
+							"query": [
+								{
+									"key": "latest-revision",
+									"value": "True"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Return a status of a specific job id",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "admin",
+									"type": "string"
+								},
+								{
+									"key": "saveHelperData",
+									"value": true,
+									"type": "boolean"
+								},
+								{
+									"key": "showPassword",
+									"value": false,
+									"type": "boolean"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Basic YWRtaW46YWRtaW4="
+							}
+						],
+						"url": {
+							"raw": "https://yangcatalog.org/api/job/12asdf56asdf132sdf5asd4f86a",
+							"protocol": "https",
+							"host": [
+								"yangcatalog",
+								"org"
+							],
+							"path": [
+								"api",
+								"job",
+								"12asdf56asdf132sdf5asd4f86a"
+							]
+						},
+						"description": "Requesting a status of a job-id"
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "basic",
+		"basic": [
+			{
+				"key": "password",
+				"value": "{{password}}",
+				"type": "string"
+			},
+			{
+				"key": "username",
+				"value": "{{username}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "host",
+			"value": "sandbox-iosxe-recomm-1.cisco.com",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "developer",
+			"type": "string"
+		},
+		{
+			"key": "password",
+			"value": "C1sco12345",
+			"type": "string"
+		},
+		{
+			"key": "port",
+			"value": "443",
+			"type": "string"
+		}
+	]
+}

@@ -1,0 +1,165 @@
+CCNA Day 4 Assignment:
+
+~~~
+!@R4
+conf t
+ int e3/3
+  ip add 208.8.8.11 255.255.255.0
+  ip add 208.8.8.12 255.255.255.0 secondary
+  no shut
+  exit
+ !
+ int e0/1
+  ip add 10.11.11.1 255.255.255.224
+  no shut
+ !
+ int e0/3
+  ip add 10.1.2.10 255.255.255.252
+  no shut
+ !
+ ip route 0.0.0.0 0.0.0.0 208.8.8.2
+ !
+ router ospf 1
+  router-id 4.4.4.4 
+  network 4.4.4.4 0.0.0.0 area 0
+  network 208.8.8.0 0.0.0.255 area 0
+  network 10.11.11.0 0.0.0.31 area 0
+  network 10.1.2.8  0.0.0.3 area 0
+  network 10.1.1.8 0.0.0.3 area 0
+  passive-interface e0/1
+ end
+~~~
+
+
+~~~
+!@R3
+conf t
+ int e0/3
+  ip add 10.1.2.9 255.255.255.252
+  no shut
+ !
+ int e0/1
+  ip add 10.22.22.1 255.255.255.224
+  no shut
+ !
+ router ospf 1
+  router-id 3.3.3.3
+  network 3.3.3.3 0.0.0.0 area 0
+  network 10.1.2.8 0.0.0.3 area 0
+  network 10.1.1.8 0.0.0.3 area 0
+  network 10.22.22.0 0.0.0.31 area 0
+  passive-interface e0/1
+  end
+~~~
+
+
+~~~
+!@P1
+conf t
+ hostname FINANCE
+ int e0/1
+  no shut
+  ip add 10.11.11.11 255.255.255.224
+  ip add 10.11.11.12 255.255.255.224 secondary
+ !
+ ip route 0.0.0.0 0.0.0.0 10.11.11.1
+ end
+~~~
+
+
+~~~
+!@P2
+conf t
+ hostname IT
+ int e0/1
+  no shut
+  ip add 10.22.22.21 255.255.255.224
+  ip add 10.22.22.22 255.255.255.224 secondary
+ !
+ ip route 0.0.0.0 0.0.0.0 10.22.22.1
+ end
+~~~
+
+
+
+
+### Make R4 Vulnerable
+
+~~~
+!@R4
+config t
+ ip domain name R4.COM
+ crypto key generate rsa modulus 2048
+ ip ssh version 2
+ username admin priv 15 secret pass
+ line vty 0 4
+  transport input all
+  login local
+  exit
+ ip host www.bet11.com 208.8.8.11
+ ip host www.bet12.com 208.8.8.12
+ ip host www.bet100.com 208.8.8.100
+ service finger
+ service tcp-small-servers
+ service udp-small-servers
+ ip dns server
+ ip http server
+ ip http secure-server
+ telephony-service
+  no auto-reg-ephone
+  max-ephones 5
+  max-dn 20
+  ip source-address 208.8.8.11 port 2000
+  exit
+ voice service voip
+  allow-connections h323 to sip
+          
+  allow-connections sip to h323
+  allow-connections sip to sip
+  supplementary-service h450.12
+ sip
+   bind control source-interface e3/3
+   bind media source-interface e3/3
+   registrar server expires max 600 min 60
+ voice register global
+  mode cme
+  source-address 208.8.8.11 port 5060 secondary 208.8.8.12
+  max-dn 12
+  max-pool 12
+  authenticate register
+  create profile sync syncinfo.xml
+  end
+~~~
+
+
+
+
+### 1. Using a STANDARD ACL, prevent FINANCE from Remotely Accessing R4
+- Make sure the STANDARD ACL uses the highest number identifier.
+
+
+
+### 2. Create an ACL that will prevent FINANCE from
+- Sending PINGs outside of FINANCE
+- Prevent Accessing R3 via TELNET
+- Allow only P1-12 (10.11.11.12) to PING R3 on its loopback interface
+ 
+
+
+### 3. Modify the ACL on R4 without removing existing entries in the ACL, 
+to allow IT to PING and TELNET FINANCE but not the otherway around.
+
+
+
+
+### 4. Allow the Following Ports on R4's e3/3 interface
+- www.bet11.com  : FTP, SIP, MySQL NTP
+- www.bet12.com  : IMAPS, POP3S, SUBMISSION, SMTPS
+
+
+
+
+### 5. Setup R4 as a Proxy for the ff:
+- www.bet100.com : 80 & 8080
+- www.bet100.com : 443 & 8443
+

@@ -1,0 +1,154 @@
+task1: python automation applet:
+
+import cli
+var1 = '''hostname NETDEVOPS
+router ospf 1
+network 0.0.0.0 255.255.255.255 area 0
+int loop 4
+ip add 4.4.4.4 255.255.255.255
+int loop 5
+ip add 5.5.5.5 255.255.255.255
+int loop 6
+ip add 6.6.6.6 255.255.255.255
+end
+'''
+cli.configurep(var1)
+
+import cli
+var2 = '''
+ip dhcp excluded-add 192.168.102.1 192.168.102.100
+    ip dhcp pool MINILINUX
+    network 192.168.102.0 255.255.255.0
+    default-router 192.168.102.11
+    domain-name MINILINUX.COM
+    dns-server 8.8.8.8
+    END
+'''
+cli.configurep(var2)
+
+
+combomeal.py
+import cli
+var3 = '''hostname CiscoPyAuto
+router ospf 1
+network 0.0.0.0 255.255.255.255 area 23
+int loop 7
+ip add 7.7.7.7 255.255.255.255
+int loop 8
+ip add 8.8.8.8 255.255.255.255
+ip dhcp excluded-add 192.168.102.1 192.168.102.100
+    ip dhcp pool MINILINUX
+    network 192.168.102.0 255.255.255.0
+    default-router 192.168.102.11
+    domain-name MINILINUX.COM
+    dns-server 8.8.8.8
+    END
+'''
+cli.configurep(var3)
+
+
+
+
+switchauto.py
+import cli
+
+var4 = '''
+   hostname COREbaba-31
+   enable secret pass
+   service password-encryption
+   no logging console
+   no ip domain-lookup
+   line console 0
+     password pass
+     login
+     exec-timeout 0 0
+    line vty 0 14
+      password pass
+      login
+      exec-timeout 0 0
+   Int Gi 0/1
+     no shutdown
+	  no switchport
+	  ip add 10.31.31.4 255.255.255.0
+   Int Vlan 1
+     no shutdown
+	 ip add 10.31.1.4 255.255.255.0
+	 description MGMTDATA
+   Int Vlan 10
+     no shutdown
+	 ip add 10.31.10.4 255.255.255.0
+	 description WIRELESS
+   Int Vlan 50
+     no shutdown
+	 ip add 10.31.50.4 255.255.255.0
+	 description IPCCTV
+   Int Vlan 100
+     no shutdown
+	 ip add 10.31.100.4 255.255.255.0
+	 description VOICEVLAN
+end
+'''
+cli.configurep(var4)
+
+
+config t
+vlan 10
+name WIFIVLAN
+vlan 50
+name IPCCTVLAN
+vlan 69
+name Vlan31
+vlan 70
+name FAVEcolor
+vlan 71
+name HR-fu
+vlan 100
+name VOICEVLAN
+Int Fa 0/2
+switchport mode access
+switchport access vlan 10  
+Int Fa 0/4
+switchport mode access
+switchport access vlan 10
+Int Fa 0/6
+switchport mode access
+switchport access vlan 50  
+Int Fa 0/8
+switchport mode access
+switchport access vlan 50    
+Int Fa 0/3
+switchport mode access
+switchport access vlan 100     
+Int Fa 0/5
+switchport mode access  
+switchport voice vlan 100
+mls qos trust device cisco-phone 
+switchport access vlan 1
+Int Fa 0/7
+switchport mode access
+switchport voice vlan 100 
+mls qos trust device cisco-phone 
+switchport access vlan 1
+end
+
+
+
+config t
+ip routing
+ip dhcp pool CAMERA6
+host 10.31.50.6 255.255.255.0
+client-identifier 001a.0709.c26b
+ip dhcp pool CAMERA8
+host 10.31.50.8 255.255.255.0
+client-identifier 001a.0706.c2f7 
+end
+show ip dhcp binding
+
+
+Phone 1
+203a.0782.bd3b
+Phone 2
+ccd8.c1fb.10dd
+
+rm -rf /etc/udev/rules.d/70-persistent-net.rules
+reboot
